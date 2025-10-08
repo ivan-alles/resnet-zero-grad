@@ -201,7 +201,7 @@ def main():
     parser.add_argument("--eval-only", action="store_true", help="Skip training, just evaluate a checkpoint (--resume)")
     parser.add_argument("--resume", type=str, default="", help="Path to checkpoint to resume/evaluate")
     parser.add_argument("--zerograd", action="store_true", help="Zero gradients in residual blocks")
-    parser.add_argument("--tag", type="str", default="", help="Experiment tag (for logging)")
+    parser.add_argument("--tag", type=str, default="", help="Experiment tag (for logging)")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
