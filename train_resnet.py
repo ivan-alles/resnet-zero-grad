@@ -154,8 +154,6 @@ class ZeroGrad(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        print("Hahahah")
-        raise NotImplementedError("ddd")
         grad_x = None
 
         if ctx.needs_input_grad[0]:
@@ -166,7 +164,7 @@ class ZeroGrad(torch.autograd.Function):
 def Bottleneck_forward(self, x):
     identity = x
 
-    ZeroGrad.apply(x)
+    x = ZeroGrad.apply(x)
 
     out = self.conv1(x)
     out = self.bn1(out)
