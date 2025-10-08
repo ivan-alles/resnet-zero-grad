@@ -199,7 +199,7 @@ def main():
         start_epoch = ckpt.get("epoch", -1) + 1
         print(f"Resumed from {args.resume} at epoch {start_epoch}")
 
-    if args.eval-only:
+    if args.eval_only:
         val_loss, top1, top5 = evaluate(model, val_loader, criterion, device)
         print(f"[eval] loss={val_loss:.4f} top1={top1:.2f} top5={top5:.2f}")
         return
