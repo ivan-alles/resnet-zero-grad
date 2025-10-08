@@ -158,7 +158,6 @@ def main():
     parser.add_argument("--betas", type=float, nargs=2, default=(0.9, 0.999))
     parser.add_argument("--label-smoothing", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--log-dir", type=str, default="runs/resnet50_adamw")
     parser.add_argument("--save", type=str, default="checkpoints")
     parser.add_argument("--eval-only", action="store_true", help="Skip training, just evaluate a checkpoint (--resume)")
     parser.add_argument("--resume", type=str, default="", help="Path to checkpoint to resume/evaluate")
@@ -184,8 +183,11 @@ def main():
     optimizer = build_optimizer(model.parameters(), args.opt, args.lr, args.weight_decay, tuple(args.betas))
 
     # TensorBoard
-    Path(args.log_dir).mkdir(parents=True, exist_ok=True)
-    writer = SummaryWriter(log_dir=args.log_dir)
+    # Create log directory under logs/resnet-TIMESTAMP
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    log_dir = os.path.join("logs", f"resnet50-{timestamp}")
+    Path(log_dir).mkdir(parents=True, exist_ok=True)
+    writer = SummaryWriter(log_dir=log_dir)
 
     start_epoch = 0
     if args.resume and os.path.isfile(args.resume):
