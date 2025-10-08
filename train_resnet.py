@@ -14,6 +14,7 @@ from torch.utils.tensorboard import SummaryWriter
 import torchvision.transforms as T
 from torchvision.datasets import ImageFolder
 from torchvision.models import resnet50
+import torchvision.models.resnet
 
 # ---------------------------
 # Utilities
@@ -146,6 +147,46 @@ def evaluate(model, loader, criterion, device):
 # Main
 # ---------------------------
 
+class ZeroGrad(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x):
+        return x
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        print("Hahahah")
+        raise NotImplementedError("ddd")
+        grad_x = None
+
+        if ctx.needs_input_grad[0]:
+            grad_x = torch.zeros_like(grad_output)
+
+        return grad_x
+
+def Bottleneck_forward(self, x):
+    identity = x
+
+    ZeroGrad.apply(x)
+
+    out = self.conv1(x)
+    out = self.bn1(out)
+    out = self.relu(out)
+
+    out = self.conv2(out)
+    out = self.bn2(out)
+    out = self.relu(out)
+
+    out = self.conv3(out)
+    out = self.bn3(out)
+
+    if self.downsample is not None:
+        identity = self.downsample(identity)
+
+    out += identity
+    out = self.relu(out)
+
+    return out
+
 def main():
     parser = argparse.ArgumentParser(description="Train ResNet-50 on ImageNet with Adam/AdamW + TensorBoard")
     parser.add_argument("--data", type=str, required=True, help="Path to ImageNet root (expects train/ and val/)")
@@ -161,6 +202,7 @@ def main():
     parser.add_argument("--save", type=str, default="checkpoints")
     parser.add_argument("--eval-only", action="store_true", help="Skip training, just evaluate a checkpoint (--resume)")
     parser.add_argument("--resume", type=str, default="", help="Path to checkpoint to resume/evaluate")
+    parser.add_argument("--zerograd", action="store_true", help="Zero gradients in residual blocks")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
@@ -172,6 +214,9 @@ def main():
 
     # Data
     train_loader, val_loader = get_data_loaders(args.data, args.batch_size, args.workers)
+
+    if args.zerograd:
+        torchvision.models.resnet.Bottleneck.forward = Bottleneck_forward
 
     # Model
     model = resnet50(weights=None, num_classes=1000).to(device)
